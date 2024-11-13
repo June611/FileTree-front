@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-
+<!-- 增加事件监听，双击 -->
 <head>
     <title>File System Tree</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
@@ -84,8 +84,8 @@
                 $toggle.click(function () {
                     $treeNode.toggleClass('expanded');
                 });
-
-                $treeNode.click(function () {
+                
+                $treeNode.dblclick(function () {
                     if (data.type === 'folder') {
                         $.get('/api/path?path=' + data.path, function (response) {
                             console.log('GET request to', data.path, 'returned:', response);
