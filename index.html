@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Tree Example</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .tree-node {
+            margin-left: 20px;
+        }
+
+        .tree-children {
+            display: none;
+        }
+
+        .tree-node.expanded .tree-children {
+            display: block;
+        }
+
+        .tree-toggle {
+            cursor: pointer;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>tree view</h1>
+    <div id="file-tree"></div>
+    <!-- 引入 JavaScript 文件或在 script 标签中直接添加上面 JavaScript 代码 -->
+    <script>
+        $(document).ready(function () {
+            var fileTree = [
+                {
+                    name: 'Root1',
+                    type: 'database',
+                    children: [
+                        { name: 'Knot1', type: 'folder', children: [] },
+                        {
+                            name: 'Knot2', type: 'folder', children: [
+                                { name: 'Leaf2', type: 'file' }
+                            ]
+                        },
+                        { name: 'Knot3', type: 'folder', children: [] }
+                    ]
+                },
+                {
+                    name: 'Root2',
+                    type: 'database',
+                    children: [
+                        { name: 'Knot4', type: 'folder', children: [] }
+                    ]
+                }
+            ];
+            // renderTree(fileTree, $('#file-tree'))
+            function renderTree(data, $parent) {
+                var $treeNode = $('<div class="tree-node">');
+                var $toggle = $('<span class="tree-toggle">');
+                var $name = $('<span>').text(data.name);
+                var $children = $('<div class="tree-children">');
+
+                $treeNode.append($toggle, $name);
+                $parent.append($treeNode);
+
+                if (data.children.length > 0) {
+                    $treeNode.addClass('expanded');
+                    data.children.forEach(function (child) {
+                        renderTree(child, $children);
+                    });
+                    $treeNode.append($children);
+                }
+
+                $toggle.click(function () {
+                    $treeNode.toggleClass('expanded');
+                });
+            }
+
+            $('#file-tree').each(function () {
+                fileTree.forEach(function (root) {
+                    renderTree(root, $(this));
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

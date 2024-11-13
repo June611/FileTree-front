@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>File System Tree</title>
+  <style>
+    .tree-node {
+      padding-left: 20px;
+      cursor: pointer;
+    }
+    .tree-node.expanded .tree-toggle:before {
+      content: "▼";
+    }
+    .tree-node:not(.expanded) .tree-toggle:before {
+      content: "▶";
+    }
+    .tree-node:not(.expanded) .tree-children {
+      display: none;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    var fileTree = [
+      {
+        name: 'Root1',
+        type: 'database',
+        children: [
+          { name: 'Knot1', type: 'folder', children: [] },
+          { name: 'Knot2', type: 'folder', children: [
+            { name: 'Leaf2', type: 'file' }
+          ]},
+          { name: 'Knot3', type: 'folder', children: [] }
+        ]
+      },
+      {
+        name: 'Root2',
+        type: 'database',
+        children: [
+          { name: 'Knot4', type: 'folder', children: [] }
+        ]
+      }
+    ];
+
+    $(document).ready(function() {
+      function renderTree($parent, data) {
+        var $treeNode = $('<div class="tree-node">');
+        var $toggle = $('<span class="tree-toggle">');
+        var $name = $('<span>').text(data.name);
+        var $children = $('<div class="tree-children">');
+
+        $treeNode.append($toggle, $name);
+        $parent.append($treeNode);
+
+        if (data.children.length > 0) {
+          $treeNode.addClass('expanded');
+          $.each(data.children, function(_, child) {
+            renderTree($children, child);
+          });
+          $treeNode.append($children);
+        }
+
+        $toggle.click(function() {
+          $treeNode.toggleClass('expanded');
+        });
+      }
+
+      $.each(fileTree, function(_, root) {
+        renderTree($('#file-tree'), root);
+      });
+    });
+  </script>
+</head>
+<body>
+  <div id="file-tree"></div>
+</body>
+</html>
+</antAftifact>
+
+<!-- 这个更新后的代码包含以下主要变化:
+
+1. 将 `renderTree()` 函数的参数顺序调整为 `$parent` 和 `data`。这样可以更清晰地表达每个节点的父容器是谁。
+2. 使用 `$.each()` 而不是 `.each()`。这样可以避免创建新的 jQuery 对象,从而解决之前的错误。
+3. 在 `$.each()` 循环中直接将根节点渲染到 `#file-tree` 容器中,而不是再使用 `.each()`。
+
+现在,保存这个更新后的代码并在浏览器中打开,应该就能看到正确显示的文件树结构了。
+
+如果您还有任何其他问题,欢迎随时告诉我。我很乐意继续为您提供帮助。 -->

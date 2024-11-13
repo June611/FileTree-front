@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>File System Tree</title>
+  <style>
+    .tree-node {
+      padding-left: 20px;
+      cursor: pointer;
+    }
+    .tree-node.expanded .tree-toggle:before {
+      content: "▼";
+    }
+    .tree-node:not(.expanded) .tree-toggle:before {
+      content: "▶";
+    }
+    .tree-node:not(.expanded) .tree-children {
+      display: none;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    var fileTree = [
+      {
+        name: 'Root1',
+        type: 'database',
+        children: [
+          { name: 'Knot1', type: 'folder', children: [] },
+          { name: 'Knot2', type: 'folder', children: [
+            { name: 'Leaf2', type: 'file' }
+          ]},
+          { name: 'Knot3', type: 'folder', children: [] }
+        ]
+      },
+      {
+        name: 'Root2',
+        type: 'database',
+        children: [
+          { name: 'Knot4', type: 'folder', children: [] }
+        ]
+      }
+    ];
+
+    $(document).ready(function() {
+      function renderTree($parent, data) {
+        var $treeNode = $('<div class="tree-node">');
+        var $toggle = $('<span class="tree-toggle">');   // 创建以一个DOM对象
+        var $name = $('<span>').text(data.name);
+        var $children = $('<div class="tree-children">');
+
+        $treeNode.append($toggle, $name);
+        $parent.append($treeNode);
+        
+        if (!$.isEmptyObject(data.children) && data.children.length > 0) {
+          $treeNode.addClass('expanded');
+          $.each(data.children, function(_, child) {
+            renderTree($children, child);
+          });
+          $treeNode.append($children);
+        }
+
+        $toggle.click(function() {
+          $treeNode.toggleClass('expanded');
+        });
+      }
+
+      $.each(fileTree, function(_, root) {
+        renderTree($('#file-tree'), root);
+      });
+    });
+  </script>
+</head>
+<body>
+   <div class="tree-node">
+    <span class="tree-toggle" ></span>
+    <span class="tree-name">Folder 1</span>
+   </div>
+
+   <div class="tree-node expanded">
+    <span class="tree-toggle"></span>    
+    <span class="tree-name">folder 2</span>
+    <div class="tree-children">
+        <div class="tree-node">
+            <span class="tree-toggle"></span>
+            <span class="tree-name">foldrer 2.1</span>
+        </div>
+    </div>
+</div>
+    <div id="file-tree"></div>
+</body>
+</html>
