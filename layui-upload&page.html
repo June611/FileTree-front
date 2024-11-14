@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>文件上传</title>
+  <link href="//unpkg.com/layui@2.9.18/dist/css/layui.css" rel="stylesheet">
+</head>
+<body>
+  <!-- 上传按钮 -->
+  <button type="button" class="layui-btn" id="upload-btn">上传文件</button>
+
+  <!-- 上传弹窗内容模板 -->
+  <div id="upload-content" style="display: none; padding: 20px;">
+    <div class="layui-upload">
+      <button type="button" class="layui-btn layui-btn-normal" id="select-files">选择多文件</button> 
+      <div class="layui-upload-list">
+        <table class="layui-table">
+          <colgroup>
+            <col>
+            <col width="150">
+            <col width="260">
+            <col width="200">  <!-- 增加描述列宽度 -->
+            <col width="150">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>文件名</th>
+              <th>大小</th>
+              <th>上传进度</th>
+              <th>描述</th>  <!-- 新增描述列 -->
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="file-list"></tbody>
+        </table>
+      </div>
+      <button type="button" class="layui-btn" id="start-upload">开始上传</button>
+    </div>
+  </div>
+
+  <script src="//unpkg.com/layui@2.9.18/dist/layui.js"></script>
+  <script>
+  layui.use(['layer', 'upload', 'element'], function(){
+    var layer = layui.layer;
+    var upload = layui.upload;
+    var element = layui.element;
+    var $ = layui.$;
+
+    // 点击上传按钮打开弹窗
+    $('#upload-btn').on('click', function(){
+      layer.open({
+        type: 1,
+        title: '文件上传',
+        area: ['900px', '500px'],
+        content: $('#upload-content'),
+        success: function(){
+          // 弹窗打开后初始化上传实例
+          initUpload();
+        }
+      });
+    });
+
+    // 初始化上传实例
+    function initUpload(){
+      var uploadInst = upload.render({
+        elem: '#select-files',
+        elemList: $('#file-list'),
+        url: 'your-upload-url',  // 替换为你的上传接口
+        accept: 'file',
+        multiple: true,
+        number: 3,
+        auto: false,
+        bindAction: '#start-upload',
+        choose: function(obj){   
+          var that = this;
+          var files = this.files = obj.pushFile();
+          
+          obj.preview(function(index, file, result){
+            var tr = $(['<tr id="upload-'+ index +'">',
+              '<td>'+ file.name +'</td>',
+              '<td>'+ (file.size/1024).toFixed(1) +'kb</td>',
+              '<td><div class="layui-progress" lay-filter="progress-'+ index +'">',
+                '<div class="layui-progress-bar" lay-percent=""></div>',
+              '</div></td>',
+              '<td><input type="text" class="layui-input file-desc" name="desc['+ index +']" placeholder="请输入描述"></td>',
+              '<td>',
+                '<button class="layui-btn layui-btn-xs demo-reload layui-hide">重传</button>',
+                '<button class="layui-btn layui-btn-xs layui-btn-danger demo-delete">删除</button>',
+              '</td>',
+            '</tr>'].join(''));
+            
+            // 单个重传
+            tr.find('.demo-reload').on('click', function(){
+              obj.upload(index, file);
+            });
+            
+            // 删除
+            tr.find('.demo-delete').on('click', function(){
+              delete files[index];
+              tr.remove();
+              uploadInst.config.elem.next()[0].value = ''; 
+            });
+            
+            that.elemList.append(tr);
+            element.render('progress');
+          });
+        },
+        before: function(obj){
+          // 在上传前将描述内容添加到请求中
+          this.data = {};
+          $('#file-list tr').each(function(){
+            var index = $(this).attr('id').split('-')[1];
+            var desc = $(this).find('.file-desc').val();
+            this.data['desc_' + index] = desc;
+          });
+        },
+        done: function(res, index, upload){
+          var that = this;
+          var tr = that.elemList.find('tr#upload-'+ index);
+          var tds = tr.children();
+          tds.eq(4).html(''); // 清空操作
+          delete this.files[index];
+          return;
+        },
+        error: function(index, upload){
+          var tr = this.elemList.find('tr#upload-'+ index);
+          var tds = tr.children();
+          tds.eq(4).find('.demo-reload').removeClass('layui-hide');
+        },
+        progress: function(n, elem, e, index){
+          element.progress('progress-'+ index, n + '%');
+        }
+      });
+    }
+  });
+  </script>
+</body>
+</html>
